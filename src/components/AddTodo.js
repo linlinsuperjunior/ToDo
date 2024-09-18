@@ -1,13 +1,14 @@
-// src/components/AddTodo.js
+
+
 import React, { useState } from 'react';
 
-function AddTodo({ onAddTodo }) {
+const AddTodo = ({ addTodo }) => {
   const [text, setText] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (text.trim()) {
-      onAddTodo(text);
+    if (text) {
+      addTodo({ text, completed: false });
       setText('');
     }
   };
@@ -18,11 +19,11 @@ function AddTodo({ onAddTodo }) {
         type="text"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Add a new todo"
+        placeholder="Add a new to-do"
       />
       <button type="submit">Add</button>
     </form>
   );
-}
+};
 
 export default AddTodo;

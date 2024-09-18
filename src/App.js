@@ -1,46 +1,31 @@
-// src/App.js
+
 import React, { useState, useEffect } from 'react';
+import ListSelector from './components/ListSelector';
+import AddListForm from './components/AddListForm';
+import ToDoList from './components/TodoList';
+import AddToDoForm from './components/AddToDoForm';
 import axios from 'axios';
-import TodoList from './components/TodoList';
-import AddTodo from './components/AddTodo';
 
-function App() {
-  const [todos, setTodos] = useState([]);
+const App = () => {
+  const [selectedList, setSelectedList] = useState(null);
 
-  useEffect(() => {
-    fetchTodos();
-  }, []);
-
-  const fetchTodos = async () => {
-    const response = await axios.get('/api/todos');
-    setTodos(response.data);
-  };
-
-  const addTodo = async (text) => {
-    const response = await axios.post('/api/todos', { text });
-    setTodos([...todos, response.data]);
-  };
-
-  const toggleTodo = async (id) => {
-    const todo = todos.find(t => t.id === id);
-    const updatedTodo = { ...todo, completed: !todo.completed };
-    await axios.put(`/api/todos/${id}`, { completed: updatedTodo.completed });
-    setTodos(todos.map(t => (t.id === id ? updatedTodo : t)));
-  };
-
-  const deleteTodo = async (id) => {
-    await axios.delete(`/api/todos/${id}`);
-    setTodos(todos.filter(t => t.id !== id));
+  const handleSelectList = (listId) => {
+    setSelectedList(listId);
   };
 
   return (
-    <div className="App">
-      <h1>To-Do List</h1>
-      <AddTodo onAddTodo={addTodo} />
-      <TodoList todos={todos} onToggleTodo={toggleTodo} onDeleteTodo={deleteTodo} />
+    <div>
+      <h1>To-Do App</h1>
+      <ListSelector onSelectList={handleSelectList} />
+      <AddListForm />
+      {selectedList && (
+        <>
+          <ToDoList listId={selectedList} />
+          <AddToDoForm listId={selectedList} />
+        </>
+      )}
     </div>
   );
-}
+};
 
 export default App;
-

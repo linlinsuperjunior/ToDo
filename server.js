@@ -1,57 +1,83 @@
+
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
-
 const app = express();
-const port = process.env.PORT || 5000;
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
 
-// In-memory data store
-let todos = [];
-let nextId = 1;
-
-// Middleware
+app.use(bodyParser.json());
 app.use(cors());
-app.use(express.json());
 
-// API Endpoints
-app.get('/api/todos', (req, res) => {
-  res.json(todos);
-});
+// In-memory store
+let lists = [];
+let todos = [];
 
-app.post('/api/todos', (req, res) => {
-  const newTodo = {
-    id: nextId++,
-    text: req.body.text,
-    completed: false,
-  };
-  todos.push(newTodo);
-  res.status(201).json(newTodo);
-});
-
-app.put('/api/todos/:id', (req, res) => {
-  const { id } = req.params;
-  const todo = todos.find(t => t.id === parseInt(id));
-  if (todo) {
-    todo.completed = req.body.completed;
-    res.json(todo);
-  } else {
-    res.status(404).send('Todo not found');
+// Get all lists
+// app.get('/api/lists', (req, res) => {
+//   res.json(lists);
+// });
+app.get('/api/lists', (req, res) => {
+  try {
+    res.json(lists);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while fetching lists' });
   }
 });
 
-app.delete('/api/todos/:id', (req, res) => {
-  const { id } = req.params;
-  todos = todos.filter(t => t.id !== parseInt(id));
-  res.status(204).send();
+// Add a new list
+// app.post('/api/lists', (req, res) => {
+//   const newList = { id: uuidv4(), name: req.body.name };
+//   lists.push(newList);
+//   res.status(201).json(newList);
+// });
+app.post('/api/lists', (req, res) => {
+  try {
+    const newList = { id: uuidv4(), name: req.body.name };
+    lists.push(newList);
+    res.status(201).json(newList);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+// Get todos for a specific list
+// app.get('/api/lists/:id/todos', (req, res) => {
+//   const listId = req.params.id;
+//   const listTodos = todos.filter(todo => todo.listId === listId);
+//   res.json(listTodos);
+// });
+app.get('/api/lists/:id/todos', (req, res) => {
+  try {
+    const listId = req.params.id;
+    const listTodos = todos.filter(todo => todo.listId === listId);
+    res.json(listTodos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while fetching todos' });
+  }
 });
 
-// Serve React app on root route
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+// Add a new todo
+// app.post('/api/lists/:id/todos', (req, res) => {
+//   const listId = req.params.id;
+//   const newTodo = { id: uuidv4(), text: req.body.text, listId };
+//   todos.push(newTodo);
+//   res.status(201).json(newTodo);
+// });
+app.post('/api/lists/:id/todos', (req, res) => {
+  try {
+    const listId = req.params.id;
+    const newTodo = { id: uuidv4(), text: req.body.text, listId };
+    todos.push(newTodo);
+    res.status(201).json(newTodo);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while adding the todo' });
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Start server
+app.listen(5000, () => {
+  console.log('Server is running on port 5000');
 });
